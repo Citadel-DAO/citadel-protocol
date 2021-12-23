@@ -741,64 +741,64 @@ library SafeERC20 {
     }
 }
 
-interface IsOHMOLD {
+interface IsCTDLOLD {
     function INDEX() external view returns ( uint );
 }
 
-contract wOHM is ERC20 {
+contract wCTDL is ERC20 {
     using SafeERC20 for ERC20;
     using Address for address;
     using SafeMath for uint;
 
-    address public immutable sOHM;
+    address public immutable sCTDL;
 
-    constructor( address _sOHM ) ERC20( 'Wrapped sOHM', 'wsOHM' ) {
-        require( _sOHM != address(0) );
-        sOHM = _sOHM;
+    constructor( address _sCTDL ) ERC20( 'Wrapped sCTDL', 'wsCTDL' ) {
+        require( _sCTDL != address(0) );
+        sCTDL = _sCTDL;
     }
 
     /**
-        @notice wrap sOHM
+        @notice wrap sCTDL
         @param _amount uint
         @return uint
      */
     function wrap( uint _amount ) external returns ( uint ) {
-        IERC20( sOHM ).transferFrom( msg.sender, address(this), _amount );
+        IERC20( sCTDL ).transferFrom( msg.sender, address(this), _amount );
 
-        uint value = sOHMTowOHM( _amount );
+        uint value = sCTDLTowCTDL( _amount );
         _mint( msg.sender, value );
         return value;
     }
 
     /**
-        @notice unwrap sOHM
+        @notice unwrap sCTDL
         @param _amount uint
         @return uint
      */
     function unwrap( uint _amount ) external returns ( uint ) {
         _burn( msg.sender, _amount );
 
-        uint value = wOHMTosOHM( _amount );
-        IERC20( sOHM ).transfer( msg.sender, value );
+        uint value = wCTDLTosCTDL( _amount );
+        IERC20( sCTDL ).transfer( msg.sender, value );
         return value;
     }
 
     /**
-        @notice converts wOHM amount to sOHM
+        @notice converts wCTDL amount to sCTDL
         @param _amount uint
         @return uint
      */
-    function wOHMTosOHM( uint _amount ) public view returns ( uint ) {
-        return _amount.mul( IsOHMOLD( sOHM ).INDEX() ).div( 10 ** decimals() );
+    function wCTDLTosCTDL( uint _amount ) public view returns ( uint ) {
+        return _amount.mul( IsCTDLOLD( sCTDL ).INDEX() ).div( 10 ** decimals() );
     }
 
     /**
-        @notice converts sOHM amount to wOHM
+        @notice converts sCTDL amount to wCTDL
         @param _amount uint
         @return uint
      */
-    function sOHMTowOHM( uint _amount ) public view returns ( uint ) {
-        return _amount.mul( 10 ** decimals() ).div( IsOHMOLD( sOHM ).INDEX() );
+    function sCTDLTowCTDL( uint _amount ) public view returns ( uint ) {
+        return _amount.mul( 10 ** decimals() ).div( IsCTDLOLD( sCTDL ).INDEX() );
     }
 
 }

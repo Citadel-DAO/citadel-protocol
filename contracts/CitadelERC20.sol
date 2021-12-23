@@ -4,19 +4,19 @@ pragma solidity ^0.7.5;
 import "./libraries/SafeMath.sol";
 
 import "./interfaces/IERC20.sol";
-import "./interfaces/IOHM.sol";
+import "./interfaces/ICTDL.sol";
 import "./interfaces/IERC20Permit.sol";
 
 import "./types/ERC20Permit.sol";
-import "./types/OlympusAccessControlled.sol";
+import "./types/CitadelAccessControlled.sol";
 
-contract OlympusERC20Token is ERC20Permit, IOHM, OlympusAccessControlled {
+contract CitadelERC20Token is ERC20Permit, ICTDL, CitadelAccessControlled {
     using SafeMath for uint256;
 
     constructor(address _authority) 
-    ERC20("Olympus", "OHM", 9) 
-    ERC20Permit("Olympus") 
-    OlympusAccessControlled(IOlympusAuthority(_authority)) {}
+    ERC20("Citadel", "CTDL", 9) 
+    ERC20Permit("Citadel") 
+    CitadelAccessControlled(ICitadelAuthority(_authority)) {}
 
     function mint(address account_, uint256 amount_) external override onlyVault {
         _mint(account_, amount_);

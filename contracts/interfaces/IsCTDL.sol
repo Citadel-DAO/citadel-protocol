@@ -3,7 +3,7 @@ pragma solidity >=0.7.5;
 
 import "./IERC20.sol";
 
-interface IsOHM is IERC20 {
+interface IsCTDL is IERC20 {
     function rebase( uint256 ohmProfit_, uint epoch_) external returns (uint256);
 
     function circulatingSupply() external view returns (uint256);

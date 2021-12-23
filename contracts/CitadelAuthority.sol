@@ -1,11 +1,11 @@
 // SPDX-License-Identifier: AGPL-3.0
 pragma solidity >=0.7.5;
 
-import "./interfaces/IOlympusAuthority.sol";
+import "./interfaces/ICitadelAuthority.sol";
 
-import "./types/OlympusAccessControlled.sol";
+import "./types/CitadelAccessControlled.sol";
 
-contract OlympusAuthority is IOlympusAuthority, OlympusAccessControlled {
+contract CitadelAuthority is ICitadelAuthority, CitadelAccessControlled {
 
 
     /* ========== STATE VARIABLES ========== */
@@ -34,7 +34,7 @@ contract OlympusAuthority is IOlympusAuthority, OlympusAccessControlled {
         address _guardian,
         address _policy,
         address _vault
-    ) OlympusAccessControlled( IOlympusAuthority(address(this)) ) {
+    ) CitadelAccessControlled( ICitadelAuthority(address(this)) ) {
         governor = _governor;
         emit GovernorPushed(address(0), governor, true);
         guardian = _guardian;

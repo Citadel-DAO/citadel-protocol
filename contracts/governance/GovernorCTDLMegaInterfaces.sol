@@ -2,47 +2,47 @@ pragma solidity ^0.5.16;
 pragma experimental ABIEncoderV2;
 
 
-contract GovernorOHMegaEvents {
-    /// @notice An event emitted when a new proposal is created
-    event ProposalCreated(uint id, address proposer, address[] targets, uint[] values, string[] signatures, bytes[] calldatas, uint startBlock, uint endBlock, uint votesNeeded, string description);
+contract GovernorCTDLMegaEvents {
+	/// @notice An event emitted when a new proposal is created
+	event ProposalCreated(uint id, address proposer, address[] targets, uint[] values, string[] signatures, bytes[] calldatas, uint startBlock, uint endBlock, uint votesNeeded, string description);
 
-    /// @notice An event emitted when a vote has been cast on a proposal
-    /// @param voter The address which casted a vote
-    /// @param proposalId The proposal id which was voted on
-    /// @param support Support value for the vote. 0=against, 1=for, 2=abstain
-    /// @param votes Number of votes which were cast by the voter
-    /// @param reason The reason given for the vote by the voter
-    event VoteCast(address indexed voter, uint proposalId, uint8 support, uint votes, string reason);
+	/// @notice An event emitted when a vote has been cast on a proposal
+	/// @param voter The address which casted a vote
+	/// @param proposalId The proposal id which was voted on
+	/// @param support Support value for the vote. 0=against, 1=for, 2=abstain
+	/// @param votes Number of votes which were cast by the voter
+	/// @param reason The reason given for the vote by the voter
+	event VoteCast(address indexed voter, uint proposalId, uint8 support, uint votes, string reason);
 
-    /// @notice An event emitted when a proposal has been canceled
-    event ProposalCanceled(uint id);
+	/// @notice An event emitted when a proposal has been canceled
+	event ProposalCanceled(uint id);
 
-    /// @notice An event emitted when a proposal has been queued in the Timelock
-    event ProposalQueued(uint id, uint eta);
+	/// @notice An event emitted when a proposal has been queued in the Timelock
+	event ProposalQueued(uint id, uint eta);
 
-    /// @notice An event emitted when a proposal has been executed in the Timelock
-    event ProposalExecuted(uint id);
+	/// @notice An event emitted when a proposal has been executed in the Timelock
+	event ProposalExecuted(uint id);
 
-    /// @notice An event emitted when the voting delay is set
-    event VotingDelaySet(uint oldVotingDelay, uint newVotingDelay);
+	/// @notice An event emitted when the voting delay is set
+	event VotingDelaySet(uint oldVotingDelay, uint newVotingDelay);
 
-    /// @notice An event emitted when the voting period is set
-    event VotingPeriodSet(uint oldVotingPeriod, uint newVotingPeriod);
+	/// @notice An event emitted when the voting period is set
+	event VotingPeriodSet(uint oldVotingPeriod, uint newVotingPeriod);
 
-    /// @notice Emitted when implementation is changed
-    event NewImplementation(address oldImplementation, address newImplementation);
+	/// @notice Emitted when implementation is changed
+	event NewImplementation(address oldImplementation, address newImplementation);
 
-    /// @notice Emitted when proposal threshold is set
-    event ProposalThresholdSet(uint oldProposalThreshold, uint newProposalThreshold);
+	/// @notice Emitted when proposal threshold is set
+	event ProposalThresholdSet(uint oldProposalThreshold, uint newProposalThreshold);
 
-    /// @notice Emitted when pendingAdmin is changed
-    event NewPendingAdmin(address oldPendingAdmin, address newPendingAdmin);
+	/// @notice Emitted when pendingAdmin is changed
+	event NewPendingAdmin(address oldPendingAdmin, address newPendingAdmin);
 
-    /// @notice Emitted when pendingAdmin is accepted, which means admin is updated
-    event NewAdmin(address oldAdmin, address newAdmin);
+	/// @notice Emitted when pendingAdmin is accepted, which means admin is updated
+	event NewAdmin(address oldAdmin, address newAdmin);
 }
 
-contract GovernorOHMegaDelegatorStorage {
+contract GovernorCTDLMegaDelegatorStorage {
     /// @notice Administrator for this contract
     address public admin;
 
@@ -55,12 +55,12 @@ contract GovernorOHMegaDelegatorStorage {
 
 
 /**
- * @title Storage for Governor OHMega Delegate
- * @notice For future upgrades, do not change GovernorOHMegaDelegateStorageV1. Create a new
- * contract which implements GovernorOHMegaDelegateStorageV1 and following the naming convention
- * GovernorOHMegaDelegateStorageVX.
+ * @title Storage for Governor CTDLMega Delegate
+ * @notice For future upgrades, do not change GovernorCTDLMegaDelegateStorageV1. Create a new
+ * contract which implements GovernorCTDLMegaDelegateStorageV1 and following the naming convention
+ * GovernorCTDLMegaDelegateStorageVX.
  */
-contract GovernorOHMegaDelegateStorageV1 is GovernorOHMegaDelegatorStorage {
+contract GovernorCTDLMegaDelegateStorageV1 is GovernorCTDLMegaDelegatorStorage {
 
     /// @notice The delay before voting on a proposal may take place, once proposed, in blocks
     uint public votingDelay;
@@ -77,16 +77,16 @@ contract GovernorOHMegaDelegateStorageV1 is GovernorOHMegaDelegatorStorage {
     /// @notice The total number of proposals
     uint public proposalCount;
 
-    /// @notice The address of the Olympus Protocol Timelock
+    /// @notice The address of the Citadel Protocol Timelock
     TimelockInterface public timelock;
 
-    /// @notice The address of the Wrapped sOHM
+    /// @notice The address of the Wrapped sCTDL
     /// @notice change from original contract
-    gOHMInterface public gOHM;
+    gCTDLInterface public gCTDL;
 
-    /// @notice The address of the sOHM
+    /// @notice The address of the sCTDL
     /// @notice change from original contract
-    sOHMInterface public sOHM;
+    sCTDLInterface public sCTDL;
 
     /// @notice The official record of all proposals ever proposed
     mapping (uint => Proposal) public proposals;
@@ -132,11 +132,11 @@ contract GovernorOHMegaDelegateStorageV1 is GovernorOHMegaDelegatorStorage {
         /// @notice Current number of votes for abstaining for this proposal
         uint abstainVotes;
 
-        /// @notice Threshold of gOHM at start of proposal
+        /// @notice Threshold of gCTDL at start of proposal
         /// @notice change from original contract
         uint thresholdAtStart;
 
-        /// @notice Number of gOHM needed to pass vote
+        /// @notice Number of gCTDL needed to pass vote
         /// @notice change from original contract
         uint votesNeeded;
 
@@ -186,14 +186,14 @@ interface TimelockInterface {
 }
 
 /// @notice change from original contract
-interface gOHMInterface {
+interface gCTDLInterface {
     function getPriorVotes(address account, uint blockNumber) external view returns (uint);
     function balanceTo( uint _amount ) external view returns ( uint );
     function balanceFrom( uint _amount ) external view returns ( uint );
 }
 
 /// @notice change from original contract
-interface sOHMInterface {
+interface sCTDLInterface {
     function circulatingSupply() external view returns ( uint );
 }
 

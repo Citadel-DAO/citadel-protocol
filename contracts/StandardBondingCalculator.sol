@@ -12,15 +12,15 @@ import "./interfaces/IBondingCalculator.sol";
 import "./interfaces/IUniswapV2ERC20.sol";
 import "./interfaces/IUniswapV2Pair.sol";
 
-contract OlympusBondingCalculator is IBondingCalculator {
+contract CitadelBondingCalculator is IBondingCalculator {
     using FixedPoint for *;
     using SafeMath for uint256;
 
-    IERC20 internal immutable OHM;
+    IERC20 internal immutable CTDL;
 
-    constructor(address _OHM) {
-        require(_OHM != address(0), "Zero address: OHM");
-        OHM = IERC20(_OHM);
+    constructor(address _CTDL) {
+        require(_CTDL != address(0), "Zero address: CTDL");
+        CTDL = IERC20(_CTDL);
     }
 
     function getKValue(address _pair) public view returns (uint256 k_) {
@@ -47,12 +47,12 @@ contract OlympusBondingCalculator is IBondingCalculator {
         (uint256 reserve0, uint256 reserve1, ) = IUniswapV2Pair(_pair).getReserves();
 
         uint256 reserve;
-        if (IUniswapV2Pair(_pair).token0() == address(OHM)) {
+        if (IUniswapV2Pair(_pair).token0() == address(CTDL)) {
             reserve = reserve1;
         } else {
-            require(IUniswapV2Pair(_pair).token1() == address(OHM), "Invalid pair");
+            require(IUniswapV2Pair(_pair).token1() == address(CTDL), "Invalid pair");
             reserve = reserve0;
         }
-        return reserve.mul(2 * (10**IERC20Metadata(address(OHM)).decimals())).div(getTotalValue(_pair));
+        return reserve.mul(2 * (10**IERC20Metadata(address(CTDL)).decimals())).div(getTotalValue(_pair));
     }
 }

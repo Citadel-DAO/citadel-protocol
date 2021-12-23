@@ -6,11 +6,11 @@ import "./libraries/SafeMath.sol";
 
 import "./types/ERC20Permit.sol";
 
-import "./interfaces/IgOHM.sol";
-import "./interfaces/IsOHM.sol";
+import "./interfaces/IgCTDL.sol";
+import "./interfaces/IsCTDL.sol";
 import "./interfaces/IStaking.sol";
 
-contract sOlympus is IsOHM, ERC20Permit {
+contract sCitadel is IsCTDL, ERC20Permit {
     /* ========== DEPENDENCIES ========== */
 
     using SafeMath for uint256;
@@ -47,7 +47,7 @@ contract sOlympus is IsOHM, ERC20Permit {
     uint256 internal INDEX; // Index Gons - tracks rebase growth
 
     address public stakingContract; // balance used to calc rebase
-    IgOHM public gOHM; // additional staked supply (governance token)
+    IgCTDL public gCTDL; // additional staked supply (governance token)
 
     Rebase[] public rebases; // past rebase data
 
@@ -71,7 +71,7 @@ contract sOlympus is IsOHM, ERC20Permit {
 
     /* ========== CONSTRUCTOR ========== */
 
-    constructor() ERC20("Staked OHM", "sOHM", 9) ERC20Permit("Staked OHM") {
+    constructor() ERC20("Staked CTDL", "sCTDL", 9) ERC20Permit("Staked CTDL") {
         initializer = msg.sender;
         _totalSupply = INITIAL_FRAGMENTS_SUPPLY;
         _gonsPerFragment = TOTAL_GONS.div(_totalSupply);
@@ -85,11 +85,11 @@ contract sOlympus is IsOHM, ERC20Permit {
         INDEX = gonsForBalance(_index);
     }
 
-    function setgOHM(address _gOHM) external {
+    function setgCTDL(address _gCTDL) external {
         require(msg.sender == initializer, "Initializer:  caller is not initializer");
-        require(address(gOHM) == address(0), "gOHM:  gOHM already set");
-        require(_gOHM != address(0), "gOHM:  gOHM is not a valid contract");
-        gOHM = IgOHM(_gOHM);
+        require(address(gCTDL) == address(0), "gCTDL:  gCTDL already set");
+        require(_gCTDL != address(0), "gCTDL:  gCTDL is not a valid contract");
+        gCTDL = IgCTDL(_gCTDL);
     }
 
     // do this last
@@ -112,7 +112,7 @@ contract sOlympus is IsOHM, ERC20Permit {
     /* ========== REBASE ========== */
 
     /**
-        @notice increases rOHM supply to increase staking balances relative to profit_
+        @notice increases rCTDL supply to increase staking balances relative to profit_
         @param profit_ uint256
         @return uint256
      */
@@ -220,8 +220,8 @@ contract sOlympus is IsOHM, ERC20Permit {
         return true;
     }
 
-    // this function is called by the treasury, and informs sOHM of changes to debt.
-    // note that addresses with debt balances cannot transfer collateralized sOHM
+    // this function is called by the treasury, and informs sCTDL of changes to debt.
+    // note that addresses with debt balances cannot transfer collateralized sCTDL
     // until the debt has been repaid.
     function changeDebt(
         uint256 amount,
@@ -234,7 +234,7 @@ contract sOlympus is IsOHM, ERC20Permit {
         } else {
             debtBalances[debtor] = debtBalances[debtor].sub(amount);
         }
-        require(debtBalances[debtor] <= balanceOf(debtor), "sOHM: insufficient balance");
+        require(debtBalances[debtor] <= balanceOf(debtor), "sCTDL: insufficient balance");
     }
 
     /* ========== INTERNAL FUNCTIONS ========== */
@@ -262,20 +262,20 @@ contract sOlympus is IsOHM, ERC20Permit {
         return gons.div(_gonsPerFragment);
     }
 
-    // toG converts an sOHM balance to gOHM terms. gOHM is an 18 decimal token. balance given is in 18 decimal format.
+    // toG converts an sCTDL balance to gCTDL terms. gCTDL is an 18 decimal token. balance given is in 18 decimal format.
     function toG(uint256 amount) external view override returns (uint256) {
-        return gOHM.balanceTo(amount);
+        return gCTDL.balanceTo(amount);
     }
 
-    // fromG converts a gOHM balance to sOHM terms. sOHM is a 9 decimal token. balance given is in 9 decimal format.
+    // fromG converts a gCTDL balance to sCTDL terms. sCTDL is a 9 decimal token. balance given is in 9 decimal format.
     function fromG(uint256 amount) external view override returns (uint256) {
-        return gOHM.balanceFrom(amount);
+        return gCTDL.balanceFrom(amount);
     }
 
-    // Staking contract holds excess sOHM
+    // Staking contract holds excess sCTDL
     function circulatingSupply() public view override returns (uint256) {
         return
-            _totalSupply.sub(balanceOf(stakingContract)).add(gOHM.balanceFrom(IERC20(address(gOHM)).totalSupply())).add(
+            _totalSupply.sub(balanceOf(stakingContract)).add(gCTDL.balanceFrom(IERC20(address(gCTDL)).totalSupply())).add(
                 IStaking(stakingContract).supplyInWarmup()
             );
     }
