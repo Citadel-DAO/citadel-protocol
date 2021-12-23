@@ -4,7 +4,7 @@ pragma solidity 0.7.5;
 import "../interfaces/IERC20.sol";
 import "../types/Ownable.sol";
 
-contract OhmFaucet is Ownable {
+contract CtdlFaucet is Ownable {
     IERC20 public ohm;
 
     constructor(address _ohm) {
