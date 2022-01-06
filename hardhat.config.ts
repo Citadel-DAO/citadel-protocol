@@ -27,10 +27,10 @@ const chainIds = {
 //const mnemonic: string | undefined = process.env.MNEMONIC ?? "NO_MNEMONIC";
 const privateKey: string | undefined = process.env.PRIVATE_KEY ?? "NO_PRIVATE_KEY";
 // Make sure node is setup on Alchemy website
-const alchemyApiKey: string | undefined = process.env.ALCHEMY_API_KEY ?? "NO_ALCHEMY_API_KEY";
+const infuraApiKey: string | undefined = process.env.INFURA_API_KEY ?? "NO_INFURA_API_KEY";
 
 function getChainConfig(network: keyof typeof chainIds): NetworkUserConfig {
-    const url = `https://eth-${network}.alchemyapi.io/v2/${alchemyApiKey}`;
+    const url = `https://mainnet.infura.io/v3/${infuraApiKey}`;
     return {
         //accounts: {
         //    count: 10,
@@ -54,7 +54,7 @@ const config: HardhatUserConfig = {
     networks: {
         hardhat: {
             forking: {
-                url: `https://eth-mainnet.alchemyapi.io/v2/${alchemyApiKey}`,
+                url: `https://mainnet.infura.io/v3/${infuraApiKey}`,
             },
             //accounts: {
             //    mnemonic,
@@ -70,7 +70,7 @@ const config: HardhatUserConfig = {
         cache: "./cache",
         sources: "./contracts",
         tests: "./test",
-        deploy: "./scripts/deploy",
+        deploy: "./deploy",
         deployments: "./deployments",
     },
     solidity: {
