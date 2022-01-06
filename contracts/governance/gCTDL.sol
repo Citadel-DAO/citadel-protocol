@@ -39,7 +39,6 @@ contract gCTDL is IgCTDL, ERC20 {
 
     IsCTDL public sCTDL;
     address public approved; // minter
-    bool public migrated;
 
     mapping(address => mapping(uint256 => Checkpoint)) public checkpoints;
     mapping(address => uint256) public numCheckpoints;
@@ -47,34 +46,16 @@ contract gCTDL is IgCTDL, ERC20 {
 
     /* ========== CONSTRUCTOR ========== */
 
-    constructor(address _migrator, address _sCTDL)
+    constructor(address _staking, address _sCTDL)
         ERC20("Governance CTDL", "gCTDL", 18)
     {
-        require(_migrator != address(0), "Zero address: Migrator");
-        approved = _migrator;
+        require(_staking != address(0), "Zero address: Staking");
+        approved = _staking;
         require(_sCTDL != address(0), "Zero address: sCTDL");
         sCTDL = IsCTDL(_sCTDL);
     }
 
     /* ========== MUTATIVE FUNCTIONS ========== */
-
-    /**
-     * @notice transfer mint rights from migrator to staking
-     * @notice can only be done once, at the time of contract migration
-     * @param _staking address
-     * @param _sCTDL address
-     */
-    function migrate(address _staking, address _sCTDL) external override onlyApproved {
-        require(!migrated, "Migrated");
-        migrated = true;
-
-        require(_staking != approved, "Invalid argument");
-        require(_staking != address(0), "Zero address found");
-        approved = _staking;
-
-        require(_sCTDL != address(0), "Zero address found");
-        sCTDL = IsCTDL(_sCTDL);
-    }
 
     /**
      * @notice Delegate votes from `msg.sender` to `delegatee`

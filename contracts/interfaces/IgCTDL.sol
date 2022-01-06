@@ -13,6 +13,4 @@ interface IgCTDL is IERC20 {
   function balanceFrom(uint256 _amount) external view returns (uint256);
 
   function balanceTo(uint256 _amount) external view returns (uint256);
-
-  function migrate( address _staking, address _sCTDL ) external;
 }
