@@ -46,11 +46,13 @@ contract gCTDL is IgCTDL, ERC20 {
 
     /* ========== CONSTRUCTOR ========== */
 
-    constructor(address _staking, address _sCTDL)
+    constructor(address _authority, address _sCTDL)
         ERC20("Governance CTDL", "gCTDL", 18)
     {
-        require(_staking != address(0), "Zero address: Staking");
-        approved = _staking;
+        // DEV TODO this was originally migrator, changed to authority. Should actually be staking.
+        require(_authority != address(0), "Zero address: Authority");
+        approved = _authority;
+
         require(_sCTDL != address(0), "Zero address: sCTDL");
         sCTDL = IsCTDL(_sCTDL);
     }
