@@ -97,18 +97,24 @@ module.exports = async () => {
 
     // DEV TODO see contract details, needs to be changed
     const GCTDL = await ethers.getContractFactory("gCTDL");
-    const gCTDL = await GCTDL.deploy(authority.address, sCTDL.address);
-    console.log("Deployed gCTDL to", gCTDL.address)
+    const gCTDL = await GCTDL.deploy(sCTDL.address);
+    console.log("Deployed gCTDL to", gCTDL.address);
+
+    // Deploy staking
+    const Staking = await ethers.getContractFactory('CitadelStaking');
+    const staking = await Staking.deploy( ctdl.address, sCTDL.address, gCTDL.address, epochLengthInBlocks, firstEpochNumber, firstEpochBlock, authority.address );
+    console.log("Deployed Staking to", staking.address);
+
+    // Set the mint authority for gCTDL as staking
+    await gCTDL.setAuthority(staking.address);
+    console.log("Give Staking contract mint permissions for gCTDL");
 
     // Deploy bonding calculator
     const CitadelBondingCalculator = await ethers.getContractFactory('CitadelBondingCalculator');
     const citadelBondingCalculator = await CitadelBondingCalculator.deploy( ctdl.address );
     console.log("Deployed CitadelBondingCalculator to", citadelBondingCalculator.address);
 
-    // Deploy staking
-    const Staking = await ethers.getContractFactory('CitadelStaking');
-    const staking = await Staking.deploy( ctdl.address, sCTDL.address, gCTDL.address, epochLengthInBlocks, firstEpochNumber, firstEpochBlock, authority.address );
-    console.log("Deployed Staking to", staking.address);
+
 
     // Deploy treasury
     const Treasury = await ethers.getContractFactory('CitadelTreasury'); 

@@ -39,6 +39,7 @@ contract gCTDL is IgCTDL, ERC20 {
 
     IsCTDL public sCTDL;
     address public approved; // minter
+    bool public approvedSet; // has the mint authority been set?
 
     mapping(address => mapping(uint256 => Checkpoint)) public checkpoints;
     mapping(address => uint256) public numCheckpoints;
@@ -46,18 +47,27 @@ contract gCTDL is IgCTDL, ERC20 {
 
     /* ========== CONSTRUCTOR ========== */
 
-    constructor(address _authority, address _sCTDL)
+    constructor(address _sCTDL)
         ERC20("Governance CTDL", "gCTDL", 18)
     {
-        // DEV TODO this was originally migrator, changed to authority. Should actually be staking.
-        require(_authority != address(0), "Zero address: Authority");
-        approved = _authority;
+        // DEV TODO this was originally migrator, changed to msg.sender. Should later be set to staking.
+        approved = msg.sender;
 
         require(_sCTDL != address(0), "Zero address: sCTDL");
         sCTDL = IsCTDL(_sCTDL);
     }
 
     /* ========== MUTATIVE FUNCTIONS ========== */
+
+    /**
+     * @notice One time function to set `approved`
+     * @param _approved The address to assign mint permissions to
+     */
+    function setApproved(address _approved) external onlyApproved {
+        require(!approvedSet, "Approved already set");
+        approved = _approved;
+        approvedSet = true;
+    }
 
     /**
      * @notice Delegate votes from `msg.sender` to `delegatee`
