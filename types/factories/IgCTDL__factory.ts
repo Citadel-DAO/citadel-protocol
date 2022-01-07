@@ -212,6 +212,19 @@ const _abi = [
     type: "function",
   },
   {
+    inputs: [
+      {
+        internalType: "address",
+        name: "_approved",
+        type: "address",
+      },
+    ],
+    name: "setApproved",
+    outputs: [],
+    stateMutability: "nonpayable",
+    type: "function",
+  },
+  {
     inputs: [],
     name: "totalSupply",
     outputs: [

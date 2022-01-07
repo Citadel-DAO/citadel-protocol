@@ -24,6 +24,7 @@ interface GCTDLInterface extends ethers.utils.Interface {
     "allowance(address,address)": FunctionFragment;
     "approve(address,uint256)": FunctionFragment;
     "approved()": FunctionFragment;
+    "approvedSet()": FunctionFragment;
     "balanceFrom(uint256)": FunctionFragment;
     "balanceOf(address)": FunctionFragment;
     "balanceTo(uint256)": FunctionFragment;
@@ -41,6 +42,7 @@ interface GCTDLInterface extends ethers.utils.Interface {
     "name()": FunctionFragment;
     "numCheckpoints(address)": FunctionFragment;
     "sCTDL()": FunctionFragment;
+    "setApproved(address)": FunctionFragment;
     "symbol()": FunctionFragment;
     "totalSupply()": FunctionFragment;
     "transfer(address,uint256)": FunctionFragment;
@@ -56,6 +58,10 @@ interface GCTDLInterface extends ethers.utils.Interface {
     values: [string, BigNumberish]
   ): string;
   encodeFunctionData(functionFragment: "approved", values?: undefined): string;
+  encodeFunctionData(
+    functionFragment: "approvedSet",
+    values?: undefined
+  ): string;
   encodeFunctionData(
     functionFragment: "balanceFrom",
     values: [BigNumberish]
@@ -103,6 +109,7 @@ interface GCTDLInterface extends ethers.utils.Interface {
     values: [string]
   ): string;
   encodeFunctionData(functionFragment: "sCTDL", values?: undefined): string;
+  encodeFunctionData(functionFragment: "setApproved", values: [string]): string;
   encodeFunctionData(functionFragment: "symbol", values?: undefined): string;
   encodeFunctionData(
     functionFragment: "totalSupply",
@@ -120,6 +127,10 @@ interface GCTDLInterface extends ethers.utils.Interface {
   decodeFunctionResult(functionFragment: "allowance", data: BytesLike): Result;
   decodeFunctionResult(functionFragment: "approve", data: BytesLike): Result;
   decodeFunctionResult(functionFragment: "approved", data: BytesLike): Result;
+  decodeFunctionResult(
+    functionFragment: "approvedSet",
+    data: BytesLike
+  ): Result;
   decodeFunctionResult(
     functionFragment: "balanceFrom",
     data: BytesLike
@@ -158,6 +169,10 @@ interface GCTDLInterface extends ethers.utils.Interface {
     data: BytesLike
   ): Result;
   decodeFunctionResult(functionFragment: "sCTDL", data: BytesLike): Result;
+  decodeFunctionResult(
+    functionFragment: "setApproved",
+    data: BytesLike
+  ): Result;
   decodeFunctionResult(functionFragment: "symbol", data: BytesLike): Result;
   decodeFunctionResult(
     functionFragment: "totalSupply",
@@ -268,6 +283,8 @@ export class GCTDL extends BaseContract {
 
     approved(overrides?: CallOverrides): Promise<[string]>;
 
+    approvedSet(overrides?: CallOverrides): Promise<[boolean]>;
+
     balanceFrom(
       _amount: BigNumberish,
       overrides?: CallOverrides
@@ -343,6 +360,11 @@ export class GCTDL extends BaseContract {
 
     sCTDL(overrides?: CallOverrides): Promise<[string]>;
 
+    setApproved(
+      _approved: string,
+      overrides?: Overrides & { from?: string | Promise<string> }
+    ): Promise<ContractTransaction>;
+
     symbol(overrides?: CallOverrides): Promise<[string]>;
 
     totalSupply(overrides?: CallOverrides): Promise<[BigNumber]>;
@@ -374,6 +396,8 @@ export class GCTDL extends BaseContract {
   ): Promise<ContractTransaction>;
 
   approved(overrides?: CallOverrides): Promise<string>;
+
+  approvedSet(overrides?: CallOverrides): Promise<boolean>;
 
   balanceFrom(
     _amount: BigNumberish,
@@ -447,6 +471,11 @@ export class GCTDL extends BaseContract {
 
   sCTDL(overrides?: CallOverrides): Promise<string>;
 
+  setApproved(
+    _approved: string,
+    overrides?: Overrides & { from?: string | Promise<string> }
+  ): Promise<ContractTransaction>;
+
   symbol(overrides?: CallOverrides): Promise<string>;
 
   totalSupply(overrides?: CallOverrides): Promise<BigNumber>;
@@ -478,6 +507,8 @@ export class GCTDL extends BaseContract {
     ): Promise<boolean>;
 
     approved(overrides?: CallOverrides): Promise<string>;
+
+    approvedSet(overrides?: CallOverrides): Promise<boolean>;
 
     balanceFrom(
       _amount: BigNumberish,
@@ -547,6 +578,8 @@ export class GCTDL extends BaseContract {
     numCheckpoints(arg0: string, overrides?: CallOverrides): Promise<BigNumber>;
 
     sCTDL(overrides?: CallOverrides): Promise<string>;
+
+    setApproved(_approved: string, overrides?: CallOverrides): Promise<void>;
 
     symbol(overrides?: CallOverrides): Promise<string>;
 
@@ -655,6 +688,8 @@ export class GCTDL extends BaseContract {
 
     approved(overrides?: CallOverrides): Promise<BigNumber>;
 
+    approvedSet(overrides?: CallOverrides): Promise<BigNumber>;
+
     balanceFrom(
       _amount: BigNumberish,
       overrides?: CallOverrides
@@ -725,6 +760,11 @@ export class GCTDL extends BaseContract {
 
     sCTDL(overrides?: CallOverrides): Promise<BigNumber>;
 
+    setApproved(
+      _approved: string,
+      overrides?: Overrides & { from?: string | Promise<string> }
+    ): Promise<BigNumber>;
+
     symbol(overrides?: CallOverrides): Promise<BigNumber>;
 
     totalSupply(overrides?: CallOverrides): Promise<BigNumber>;
@@ -757,6 +797,8 @@ export class GCTDL extends BaseContract {
     ): Promise<PopulatedTransaction>;
 
     approved(overrides?: CallOverrides): Promise<PopulatedTransaction>;
+
+    approvedSet(overrides?: CallOverrides): Promise<PopulatedTransaction>;
 
     balanceFrom(
       _amount: BigNumberish,
@@ -836,6 +878,11 @@ export class GCTDL extends BaseContract {
     ): Promise<PopulatedTransaction>;
 
     sCTDL(overrides?: CallOverrides): Promise<PopulatedTransaction>;
+
+    setApproved(
+      _approved: string,
+      overrides?: Overrides & { from?: string | Promise<string> }
+    ): Promise<PopulatedTransaction>;
 
     symbol(overrides?: CallOverrides): Promise<PopulatedTransaction>;
 

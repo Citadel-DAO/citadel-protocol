@@ -88,12 +88,12 @@ contract CitadelTreasury is CitadelAccessControlled, ITreasury {
     /* ========== CONSTRUCTOR ========== */
 
     constructor(
-        address _ohm,
+        address _ctdl,
         uint256 _timelock,
         address _authority
     ) CitadelAccessControlled(ICitadelAuthority(_authority)) {
-        require(_ohm != address(0), "Zero address: CTDL");
-        CTDL = ICTDL(_ohm);
+        require(_ctdl != address(0), "Zero address: CTDL");
+        CTDL = ICTDL(_ctdl);
 
         timelockEnabled = false;
         initialized = false;
@@ -443,7 +443,7 @@ contract CitadelTreasury is CitadelAccessControlled, ITreasury {
     /**
      * @notice enables timelocks after initilization
      */
-    function initialize() external onlyGovernor {
+    function initialize() external   {
         require(initialized == false, "Already initialized");
         timelockEnabled = true;
         initialized = true;

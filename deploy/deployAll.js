@@ -85,6 +85,8 @@ module.exports = async () => {
         deployer.address
     );
 
+    /* ------------------- CORE TOKENS ------------------- */
+
     // Deploy CTDL
     const CTDL = await ethers.getContractFactory('CitadelERC20Token');
     const ctdl = await CTDL.deploy( authority.address );
@@ -100,36 +102,41 @@ module.exports = async () => {
     const gCTDL = await GCTDL.deploy(sCTDL.address);
     console.log("Deployed gCTDL to", gCTDL.address);
 
+    /* --------------------------------------------------- */
+
     // Deploy staking
     const Staking = await ethers.getContractFactory('CitadelStaking');
     const staking = await Staking.deploy( ctdl.address, sCTDL.address, gCTDL.address, epochLengthInBlocks, firstEpochNumber, firstEpochBlock, authority.address );
     console.log("Deployed Staking to", staking.address);
 
+    // Deploy staking helper
+    //const StakingHelper = await ethers.getContractFactory('StakingHelper');
+    //const stakingHelper = await StakingHelper.deploy(staking.address, ctdl.address);
+    //console.log("Deployed StakingHelper to", stakingHelper.address);
+
     // Set the mint authority for gCTDL as staking
-    await gCTDL.setAuthority(staking.address);
+    await gCTDL.setApproved(staking.address);
     console.log("Give Staking contract mint permissions for gCTDL");
 
-    // Deploy bonding calculator
-    const CitadelBondingCalculator = await ethers.getContractFactory('CitadelBondingCalculator');
-    const citadelBondingCalculator = await CitadelBondingCalculator.deploy( ctdl.address );
-    console.log("Deployed CitadelBondingCalculator to", citadelBondingCalculator.address);
 
-
-
+    // Treasury Param - Timelock?
+    const timelock = 1;
     // Deploy treasury
     const Treasury = await ethers.getContractFactory('CitadelTreasury'); 
-    const treasury = await Treasury.deploy( ctdl.address, wBTC.address, authority.address );
+    const treasury = await Treasury.deploy( ctdl.address, timelock, authority.address );
     console.log("Deployed Treasury to", treasury.address);
 
     //TODO enable timelock for treasury
+    await treasury.initialize();
+    console.log("Initialized treasury");
 
-
-    //TODO replaced migrator with authority.address in below 2 lines
-    await treasury.queueTimelock("0", authority.address, authority.address);
-    await treasury.queueTimelock("8", authority.address, authority.address);
+    await treasury.queueTimelock("0", staking.address, staking.address); //TODO DEV is neccesary? was originally migrator
+    await treasury.queueTimelock("8", staking.address, staking.address); //TODO DEV is neccesary? was originally migrator
     await treasury.queueTimelock("2", wBTC.address, wBTC.address);
+    console.log("Timelocks queued")
 
     await authority.pushVault(treasury.address, true);
+    console.log("Pushed treasury vault to authority");
 
     // Deploy staking distributor
     const Distributor = await ethers.getContractFactory('Distributor');
@@ -150,8 +157,61 @@ module.exports = async () => {
     await treasury.execute("0");
     await treasury.execute("1");
     await treasury.execute("2");
-    await treasury.execute("3");
-    await treasury.execute("4");
+
+    /*
+    Bonding Stuff
+    */
+
+    // Bonding Calculator
+    const BondingCalculator = await ethers.getContractFactory("CitadelBondingCalculator");
+    const bondingCalculator = await BondingCalculator.deploy(ctdl.address);
+    console.log("Deployed Bonding Calculator to", bondingCalculator.address);
+
+    // Deploy Bond Depository
+    const BondDepository = await ethers.getContractFactory('CitadelBondDepository');
+    const bondDepository = await BondDepository.deploy(ctdl.address, treasury.address, authority.address);
+    console.log("Deployed Bond Depository to", bondDepository.address);
+
+    // Create wBTC Bond
+    await bondDepository.addBond(
+        wBTC.address, //principal
+        bondingCalculator.address, //calculator
+        '500000000000', // TODO DEV this is bond capacity. currently an arbitrarily chosen number
+        true // TODO DEV capacityIsPayout var.. set randomly
+    );
+    const bondId = 0;
+    console.log("Created wBTC Bond with ID:", bondId);
+
+    // Create Bond Teller
+    const BondTeller = await ethers.getContractFactory('BondTeller');
+    const bondTeller = await BondTeller.deploy(
+        bondDepository.address,
+        staking.address,
+        treasury.address,
+        ctdl.address,
+        sCTDL.address,
+        authority.address
+    );
+    console.log("Deployed Bond Teller to:", bondTeller.address);
+    
+    // Set bond teller address in depository
+    await bondDepository.setTeller(bondTeller.address);
+    console.log("Set Teller address in Bond Depository");
+
+    // Set wBTC bond terms
+    await bondDepository.setTerms(
+        bondId,
+        wBTCBondBCV, // controlVariable
+        false, // TODO DEV fixedTerm set arbitrarily to false
+        bondVestingLength, // vestingTerm
+        '10000000000000000000', // TODO DEV expiration for bond. randomly set
+        '10000000000000000000', // TODO DEV conclusion for bond. randomly set
+        minBondPrice, // minimum price
+        maxBondPayout, // maximum payout
+        maxBondDebt, // max bond debt
+        intialBondDebt // initial bond debt
+    );
+    console.log("Set terms of wBTC Bond")
 
     /*
     Allocator Configuration
@@ -179,12 +239,11 @@ module.exports = async () => {
     console.log( "CTDL: " + ctdl.address );
     console.log( "wBTC: " + wBTC.address );
     console.log( "Treasury: " + treasury.address );
-    console.log( "Calc: " + citadelBondingCalculator.address );
     console.log( "Staking: " + staking.address );
     console.log( "sCTDL: " + sCTDL.address );
     console.log( "Distributor " + distributor.address);
-    console.log( "Staking Wawrmup " + stakingWarmup.address);
-    console.log( "Staking Helper " + stakingHelper.address);
-    console.log("wBTC Bond: " + wBTCBond.address);
+    //console.log( "Staking Wawrmup " + stakingWarmup.address);
+    //console.log( "Staking Helper " + stakingHelper.address);
+    console.log( "Bonding Calculator: " + bondingCalculator.address);
     //console.log("Allocator: " + allocator.address);
 }

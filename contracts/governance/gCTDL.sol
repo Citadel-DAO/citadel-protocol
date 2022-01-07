@@ -63,7 +63,7 @@ contract gCTDL is IgCTDL, ERC20 {
      * @notice One time function to set `approved`
      * @param _approved The address to assign mint permissions to
      */
-    function setApproved(address _approved) external onlyApproved {
+    function setApproved(address _approved) external override onlyApproved {
         require(!approvedSet, "Approved already set");
         approved = _approved;
         approvedSet = true;

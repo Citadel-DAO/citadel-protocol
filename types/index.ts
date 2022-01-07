@@ -2,7 +2,7 @@
 /* tslint:disable */
 /* eslint-disable */
 export type { IERC20 } from "./IERC20";
-export type { IBBTCAllocator } from "./IBBTCAllocator";
+export type { IbBTCSettAllocator } from "./IbBTCSettAllocator";
 export type { CitadelBondDepository } from "./CitadelBondDepository";
 export type { BondTeller } from "./BondTeller";
 export type { CitadelAuthority } from "./CitadelAuthority";
@@ -67,7 +67,7 @@ export type { Guardable } from "./Guardable";
 export type { VaultOwned } from "./VaultOwned";
 
 export { IERC20__factory } from "./factories/IERC20__factory";
-export { IBBTCAllocator__factory } from "./factories/IBBTCAllocator__factory";
+export { IbBTCSettAllocator__factory } from "./factories/IbBTCSettAllocator__factory";
 export { CitadelBondDepository__factory } from "./factories/CitadelBondDepository__factory";
 export { BondTeller__factory } from "./factories/BondTeller__factory";
 export { CitadelAuthority__factory } from "./factories/CitadelAuthority__factory";

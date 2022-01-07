@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: MIT
-pragma solidity >=0.8.4;
+pragma solidity ^0.7.5;
 
 
 import { Address } from "@openzeppelin/contracts/utils/Address.sol";
@@ -107,7 +107,7 @@ contract ibBTCSettAllocator is Ownable {
             0
         );
         
-        treasury.deposit( _amountOut, address( wBTC ), treasury.valueOf( address( wBTC ), _amountOut ) ); // return funds to treasury
+        treasury.deposit( _amountOut, address( wBTC ), treasury.tokenValue( address(wBTC), _amountOut ) ); // return funds to treasury
     }
 
 }
