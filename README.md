@@ -5,7 +5,13 @@ Forked from [https://github.com/OlympusDAO/olympus-contracts](https://github.com
 ##  🔧 Setting up Local Development
 Required: 
 - [Node v14](https://nodejs.org/download/release/latest-v14.x/)  
-- [Git](https://git-scm.com/downloads)
+- [Git](https://git-scm.com/downloads)  
+
+
+Environment Variables:
+- INFURA_API_KEY: The Infura project key to fork with
+
+
 
 
 Local Setup Steps:
@@ -13,7 +19,9 @@ Local Setup Steps:
 1. Install dependencies: `yarn` 
     - Installs [Hardhat](https://hardhat.org/getting-started/) & [OpenZepplin](https://docs.openzeppelin.com/contracts/4.x/) dependencies
 1. Compile Solidity: `yarn compile`
-1. **_TODO_**: How to do local deployments of the contracts.
+2. Set environment variables. See above section on required env variables.  
+3. Run Deployment Script: `yarn hardhat deploy`
+
 
 
 ## Allocator Guide
