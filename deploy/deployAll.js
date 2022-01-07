@@ -1,17 +1,6 @@
 const hre = require('hardhat');
 const { ethers } = hre;
 
-/* ======== ALLOCATOR (CurveBadger) ======== */
-
-// The token the allocator wants
-const allocatorWant = '0x2260FAC5E5542a773Aa44fBCfeDf7C193bc2C599';
-
-// The curve pool to use
-const allocatorCurve = '0xFbdCA68601f835b27790D98bbb8eC7f05FDEaA9B';
-
-// The Badger sett to use
-const allocatorSett = '0xaE96fF08771a109dc6650a1BdCa62F2d558E40af';
-
 
 /* ======== PARAMS ======== */
 
@@ -79,11 +68,6 @@ module.exports = async () => {
     const [deployer, MockDAO] = await ethers.getSigners();
     console.log('Deploying contracts with the account: ' + deployer.address);
 
-    // Deploy CTDL
-    const CTDL = await ethers.getContractFactory('CitadelERC20Token');
-    const ctdl = await CTDL.deploy();
-    console.log("Deployed CTDL to", ctdl.address);
-
     // Deploy wBTC
     const WBTC = await ethers.getContractFactory('wBTC');
     const wBTC = await WBTC.deploy( 0 );
@@ -93,116 +77,75 @@ module.exports = async () => {
     await wBTC.mint( deployer.address, initialMint );
     console.log("Minted 10,000,000 mock wBTC");
 
-    // Deploy mock treasury
-    const Treasury = await ethers.getContractFactory('MockCitadelTreasury'); 
-    const treasury = await Treasury.deploy( ctdl.address, wBTC.address, 0 );
-    console.log("Deployed Treasury to", treasury.address);
+    const Authority = await ethers.getContractFactory("CitadelAuthority");
+    const authority = await Authority.deploy(
+        deployer.address,
+        deployer.address,
+        deployer.address,
+        deployer.address
+    );
 
-    // Deploy bonding calculator
-    const CitadelBondingCalculator = await ethers.getContractFactory('CitadelBondingCalculator');
-    const citadelBondingCalculator = await CitadelBondingCalculator.deploy( ctdl.address );
-    console.log("Deployed CitadelBondingCalculator to", citadelBondingCalculator.address);
-
-    // Deploy staking distributor
-    const Distributor = await ethers.getContractFactory('Distributor');
-    const distributor = await Distributor.deploy(treasury.address, ctdl.address, epochLengthInBlocks, firstEpochBlock);
-    console.log("Deployed Distributor to", distributor.address);
+    // Deploy CTDL
+    const CTDL = await ethers.getContractFactory('CitadelERC20Token');
+    const ctdl = await CTDL.deploy( authority.address );
+    console.log("Deployed CTDL to", ctdl.address);
 
     // Deploy sCTDL
     const SCTDL = await ethers.getContractFactory('sCitadel');
     const sCTDL = await SCTDL.deploy();
     console.log("Deployed sCTDL to", sCTDL.address);
 
+    // DEV TODO see contract details, needs to be changed
+    const GCTDL = await ethers.getContractFactory("gCTDL");
+    const gCTDL = await GCTDL.deploy(authority.address, sCTDL.address);
+    console.log("Deployed gCTDL to", gCTDL.address)
+
+    // Deploy bonding calculator
+    const CitadelBondingCalculator = await ethers.getContractFactory('CitadelBondingCalculator');
+    const citadelBondingCalculator = await CitadelBondingCalculator.deploy( ctdl.address );
+    console.log("Deployed CitadelBondingCalculator to", citadelBondingCalculator.address);
+
     // Deploy staking
     const Staking = await ethers.getContractFactory('CitadelStaking');
-    const staking = await Staking.deploy( ctdl.address, sCTDL.address, epochLengthInBlocks, firstEpochNumber, firstEpochBlock );
+    const staking = await Staking.deploy( ctdl.address, sCTDL.address, gCTDL.address, epochLengthInBlocks, firstEpochNumber, firstEpochBlock, authority.address );
     console.log("Deployed Staking to", staking.address);
 
-    // Deploy staking warmpup
-    const StakingWarmup = await ethers.getContractFactory('StakingWarmup');
-    const stakingWarmup = await StakingWarmup.deploy(staking.address, sCTDL.address);
-    console.log("Deployed StakingWarmup to", stakingWarmup.address);
+    // Deploy treasury
+    const Treasury = await ethers.getContractFactory('CitadelTreasury'); 
+    const treasury = await Treasury.deploy( ctdl.address, wBTC.address, authority.address );
+    console.log("Deployed Treasury to", treasury.address);
 
-    // Deploy staking helper
-    const StakingHelper = await ethers.getContractFactory('StakingHelper');
-    const stakingHelper = await StakingHelper.deploy(staking.address, ctdl.address);
-    console.log("Deployed StakingHelper to", stakingHelper.address);
+    //TODO enable timelock for treasury
 
-    // Deploy wBTC bond
-    const WBTCBond = await ethers.getContractFactory('MockCitadelBondDepository');
-    const wBTCBond = await WBTCBond.deploy(ctdl.address, wBTC.address, treasury.address, MockDAO.address, zeroAddress);
-    console.log("Deployed wBTCBond to", wBTCBond.address);
 
-    // Queue and toggle wBTC bond reserve depositor
-    await treasury.queue('0', wBTCBond.address)
-    await treasury.toggle('0', wBTCBond.address, zeroAddress);
-    console.log("Assigned and toggled ReserveDepositor permissions for wBTCBond");
+    //TODO replaced migrator with authority.address in below 2 lines
+    await treasury.queueTimelock("0", authority.address, authority.address);
+    await treasury.queueTimelock("8", authority.address, authority.address);
+    await treasury.queueTimelock("2", wBTC.address, wBTC.address);
 
-    // Set wBTC bond terms
-    await wBTCBond.initializeBondTerms(wBTCBondBCV, bondVestingLength, minBondPrice, maxBondPayout, bondFee, maxBondDebt, intialBondDebt)
-    console.log("Initialized wBTC bond terms");
+    await authority.pushVault(treasury.address, true);
 
-    // Set staking for wBTC bond
-    await wBTCBond.setStaking(staking.address, stakingHelper.address);
-    console.log("Set staking address for wBTC bonds");
+    // Deploy staking distributor
+    const Distributor = await ethers.getContractFactory('Distributor');
+    const distributor = await Distributor.deploy(treasury.address, ctdl.address, sCTDL.address, authority.address);
+    console.log("Deployed Distributor to", distributor.address);
 
-    // Initialize sCTDL and set the index
-    await sCTDL.initialize(staking.address);
-    await sCTDL.setIndex(initialIndex);
-    console.log("Initialized and set index for sCTDL");
+    // Initialize sohm
+    await sCTDL.setIndex("7675210820");
+    await sCTDL.setgCTDL(gCTDL.address);
+    await sCTDL.initialize(staking.address, treasury.address);
 
-    // Set distributor and warmup contracts
-    await staking.setContract('0', distributor.address);
-    await staking.setContract('1', stakingWarmup.address);
-    console.log("Set the distributor and warmup contracts for staking");
+    console.log("setting distributor")
 
-    // Set treasury for CTDL token
-    await ctdl.setVault(treasury.address);
-    console.log("Set treasury as vault for CTDL");
+    await staking.setDistributor(distributor.address);
 
-    // Add staking contract as distributor recipient
-    await distributor.addRecipient(staking.address, initialRewardRate);
-    console.log("Added staking contract as Distributor recipient");
+    console.log("executing treasury");
 
-    // queue and toggle reward manager
-    await treasury.queue('8', distributor.address);
-    await treasury.toggle('8', distributor.address, zeroAddress);
-    console.log("Assigned and toggled RewardManager permissions for Distributor");
-
-    // queue and toggle deployer reserve depositor
-    await treasury.queue('0', deployer.address);
-    await treasury.toggle('0', deployer.address, zeroAddress);
-    console.log("Assigned and toggled ReserveDepositor permissions for Deployer");
-
-    // queue and toggle liquidity depositor
-    await treasury.queue('4', deployer.address, );
-    await treasury.toggle('4', deployer.address, zeroAddress);
-    console.log("Assigned and toggled LiquidityDepositor permissions for Deployer");
-
-    // Approve the treasury to spend wBTC
-    await wBTC.approve(treasury.address, largeApproval );
-    console.log("Approved treasury spending of wBTC");
-
-    // Approve dai and frax bonds to spend deployer's DAI and Frax
-    await wBTC.approve(wBTCBond.address, largeApproval );
-    console.log("Approved bond contract spending of wBTC");
-
-    // Approve staking and staking helper contact to spend deployer's CTDL
-    await ctdl.approve(staking.address, largeApproval);
-    await ctdl.approve(stakingHelper.address, largeApproval);
-    console.log("Approved staking contract spending of CTDL");
-
-    // Deposit 9,000,000 wBTC to treasury, 600,000 CTDL gets minted to deployer and 8,400,000 are in treasury as excesss reserves
-    await treasury.deposit('9000000000000000000000000', wBTC.address, '8400000000000000');
-    console.log("Deposited 9,000,000 wBTC to treasury. 600,000 CTDL minted to deployer. 8,400,000 CTDL remain in treasury")
-
-    // Stake CTDL through helper
-    await stakingHelper.stake('100000000000');
-    console.log("Staked CTDL")
-
-    // Bond 1,000 CTDL wBTC in the bonds
-    await wBTCBond.deposit('1000000000000000000000', '60000', deployer.address );
-    console.log("Bonded 1,000 CTDL wBTC");
+    await treasury.execute("0");
+    await treasury.execute("1");
+    await treasury.execute("2");
+    await treasury.execute("3");
+    await treasury.execute("4");
 
     /*
     Allocator Configuration
