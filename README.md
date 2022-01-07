@@ -63,10 +63,10 @@ function deposit( address _from, uint _amount, address _token, uint _profit ) ex
 To ensure no OHM is minted, we first get the value of the asset, and pass that in as profit.
 Pass in the token address and amount to get the treasury value.
 ```
-function valueOf( address _token, uint _amount ) public view returns ( uint value_ );
+function tokenValue( address _token, uint _amount ) public view returns ( uint value_ );
 ```
 
 All together, returning funds should look something like this:
 ```
-treasury.deposit( address(this), amountToReturn, DAI, treasury.valueOf( DAI, amountToReturn ) );
+treasury.deposit( amountToReturn, wBTC, treasury.tokenValue( wBTC, amountToReturn ) );
 ```
